@@ -1,6 +1,6 @@
-NAME = test_strlen
+NAME = libasm
 
-ASM_SRC = ft_strlen.s ft_print_chars.s
+ASM_SRC = ft_strlen.s
 C_SRC = main.c
 ASM_OBJ = $(ASM_SRC:.s=.o)
 C_OBJ = $(C_SRC:.c=.o)
