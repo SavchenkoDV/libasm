@@ -4,8 +4,9 @@ ft_write:
     mov rax, 1
     syscall
     cmp rax, -1
-    jne .return
+    jne .error
     ret 
-.return:
+.error:
     ret
-    
+
+section .note.GNU-stack noalloc noexec nowrite progbits    
