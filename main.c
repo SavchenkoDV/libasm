@@ -2,7 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-size_t ft_strlen(const char *s);
+size_t  ft_strlen(const char *s);
+int     ft_strcmp(const char *s1, const char *s2);
 ssize_t ft_write(int fd, const void *buf, size_t count);
 
 void strlen_test() {
@@ -40,6 +41,53 @@ void strlen_test() {
     }
 }
 
+void strcmp_test() {
+    char input_f[256];
+    char input_s[256];
+    int counter = 0;
+
+    printf("\nYou are testing the ft_strcmp function.\n");
+    printf("Enter two strings to test the function, or type:\n");
+    printf("  - \"EXIT\" to quit the program.\n");
+    printf("  - \"MENU\" to return to the program menu.\n");
+
+    while (1) {        
+        printf("\nInput first string: ");
+        if (!fgets(input_f, sizeof(input_f), stdin)) {
+            printf("Input error. Please try again.\n");
+            continue;
+        }
+        input_f[strcspn(input_f, "\n")] = '\0'; 
+
+        if (strcmp(input_f, "EXIT") == 0) {
+            printf("Exiting the program.\n");
+            exit(0);
+        } else if (strcmp(input_f, "MENU") == 0) {
+            printf("Returning to the main menu.\n");
+            break;
+        }
+
+        printf("Input second string: ");
+        if (!fgets(input_s, sizeof(input_s), stdin)) {
+            printf("Input error. Please try again.\n");
+            continue;
+        }
+        input_s[strcspn(input_s, "\n")] = '\0';
+
+        if (strcmp(input_s, "EXIT") == 0 || strcmp(input_s, "MENU") == 0) {
+            printf("Invalid input. Please enter valid strings for comparison.\n");
+            continue;
+        }
+
+        printf("\nTest number: %i\n", ++counter);
+        printf("   strcmp result: %d\n", strcmp(input_f, input_s));
+        printf("ft_strcmp result: %d\n", ft_strcmp(input_f, input_s));
+
+        printf("\n  - \"EXIT\" to quit the program.\n");
+        printf("  - \"MENU\" to return to the program menu.\n");
+    }
+}
+
 int main() {
     int number = -1;
 
@@ -70,6 +118,9 @@ int main() {
             printf("You selected function %d.\n", number);
             if (number == 1) {
                 strlen_test();
+            }
+            if (number == 3) {
+                strcmp_test();
             } else {
                 printf("Function %d is not yet implemented.\n", number);
             }
