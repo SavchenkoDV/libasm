@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
 
 size_t  ft_strlen(const char *s);
 char    *ft_strcpy(char *restrict dst, const char *restrict src);
@@ -27,18 +29,17 @@ void strlen_test() {
             } else if (strcmp(input, "MENU") == 0) {
                 printf("Returning to the main menu.\n");
                 break;
-            } else if (input[0] == '\0') {
-                printf("Empty input. Please enter some data.\n");
-            } else {
-                printf("Test number: %i\n", ++counter);
-                printf("   strlen result: %zu\n", strlen(input));
-                printf("ft_strlen result: %zu\n", ft_strlen(input));
-            }
+            } 
+
+            printf("Test number: %i\n", ++counter);
+            printf("   strlen result: %zu\n", strlen(input));
+            printf("ft_strlen result: %zu\n", ft_strlen(input));
         } else {
             printf("Input error. Please try again.\n");
         }
-    printf("\n  - \"EXIT\" to quit the program.\n");
-    printf("  - \"MENU\" to return to the program menu.\n");
+
+        printf("\n  - \"EXIT\" to quit the program.\n");
+        printf("  - \"MENU\" to return to the program menu.\n");
     }
 }
 
@@ -62,17 +63,14 @@ void strcpy_test() {
             } else if (strcmp(input, "MENU") == 0) {
                 printf("Returning to the main menu.\n");
                 break;
-            } else if (input[0] == '\0') {
-                printf("Empty input. Please enter some data.\n");
-            } else {
-                char std_dest[256] = {0};
-                char ft_dest[256] = {0};
-
-                printf("\nTest number: %i\n", ++counter);
-                printf("   strcpy result: \"%s\"\n", strcpy(std_dest, input));
-                printf("ft_strcpy result: \"%s\"\n", ft_strcpy(ft_dest, input));
-                
             }
+
+            char std_dest[256] = {0};
+            char ft_dest[256] = {0};
+
+            printf("\nTest number: %i\n", ++counter);
+            printf("   strcpy result: \"%s\"\n", strcpy(std_dest, input));
+            printf("ft_strcpy result: \"%s\"\n", ft_strcpy(ft_dest, input));
         } else {
             printf("Input error. Please try again.\n");
         }
@@ -130,6 +128,80 @@ void strcmp_test() {
     }
 }
 
+void write_test() {
+    char input[256];
+    char fd_input[256];
+    int fd;
+    int counter = 0;
+
+    printf("\nYou are testing the ft_write function.\n");
+    printf("Enter any data to test the function, or type:\n");
+    printf("  - \"EXIT\" to quit the program.\n");
+    printf("  - \"MENU\" to return to the program menu.\n");
+
+    while (1) {
+        printf("\nInput the file descriptor: ");
+        if (fgets(fd_input, sizeof(fd_input), stdin)) {
+            fd_input[strcspn(fd_input, "\n")] = '\0'; 
+
+            if (strcmp(fd_input, "EXIT") == 0) {
+                printf("Exiting the program.\n");
+                exit(0);
+            } else if (strcmp(fd_input, "MENU") == 0) {
+                printf("Returning to the main menu.\n");
+                break;
+            }
+
+            if (sscanf(fd_input, "%d", &fd) != 1) {
+                printf("Invalid file descriptor. Please enter a integer.\n");
+                continue;
+            }
+
+            printf("Enter the string to write: ");
+            if (fgets(input, sizeof(input), stdin)) {
+                input[strcspn(input, "\n")] = '\0';
+
+                if (strcmp(input, "EXIT") == 0) {
+                    printf("Exiting the program.\n");
+                    exit(0);
+                } else if (strcmp(input, "MENU") == 0) {
+                    printf("Returning to the main menu.\n");
+                    break;
+                }
+
+                printf("\nTest number: %i\n", ++counter);                
+                
+                printf("\n    write result: \n");
+                
+                errno = 0; 
+                ssize_t std_result = write(fd, input, strlen(input));
+                int std_errno = errno;
+
+                printf("\n    ft_write result: \n");
+                
+                errno = 0;
+                ssize_t ft_result = ft_write(fd, input, strlen(input));
+                int ft_errno = errno;
+
+                printf("\n");
+
+                printf("   write read byte(s): %zd, errno: %d (%s)\n", std_result, std_errno, strerror(std_errno));
+                printf("   ft_write read byte(s): %zd, errno: %d (%s)\n", ft_result, ft_errno, strerror(ft_errno));
+
+            } else {
+                printf("Input error. Please try again.\n");
+                while (getchar() != '\n');
+            }
+        } else {
+            printf("Input error. Please try again.\n");
+            while (getchar() != '\n');
+        }
+
+        printf("\n  - \"EXIT\" to quit the program.\n");
+        printf("  - \"MENU\" to return to the program menu.\n");
+    }
+}
+
 int main() {
     int number = -1;
 
@@ -166,6 +238,9 @@ int main() {
             }
             if (number == 3) {
                 strcmp_test();
+            }
+            if (number == 4) {
+                write_test();
             } else {
                 printf("Function %d is not yet implemented.\n", number);
             }

@@ -6,8 +6,6 @@ ft_strcmp:
     mov bl, [rsi]
     cmp al, 0
     je .return
-    cmp bl, 0
-    je .return       
     cmp al, bl           
     jne .return                        
     inc rdi                
