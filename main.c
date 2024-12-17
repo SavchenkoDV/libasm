@@ -3,11 +3,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
 
 size_t  ft_strlen(const char *s);
 char    *ft_strcpy(char *restrict dst, const char *restrict src);
 int     ft_strcmp(const char *s1, const char *s2);
 ssize_t ft_write(int fd, const void *buf, size_t count);
+ssize_t ft_read(int fd, void *buf, size_t count);
 
 void strlen_test() {
     char    input[256];
@@ -153,7 +155,7 @@ void write_test() {
             }
 
             if (sscanf(fd_input, "%d", &fd) != 1) {
-                printf("Invalid file descriptor. Please enter a integer.\n");
+                printf("Invalid file descriptor. Please enter an integer.\n");
                 continue;
             }
 
@@ -170,7 +172,6 @@ void write_test() {
                 }
 
                 printf("\nTest number: %i\n", ++counter);                
-                
                 printf("\n    write result: \n");
                 
                 errno = 0; 
@@ -188,6 +189,30 @@ void write_test() {
                 printf("   write read byte(s): %zd, errno: %d (%s)\n", std_result, std_errno, strerror(std_errno));
                 printf("   ft_write read byte(s): %zd, errno: %d (%s)\n", ft_result, ft_errno, strerror(ft_errno));
 
+                printf("\nTesting with an open file descriptor:\n");
+                int file_fd = open("test", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                if (file_fd < 0) {
+                    perror("Failed to open file for testing");
+                } else {
+                    printf("Opened 'test' for writing.\n\n");
+                    
+                    errno = 0;
+                    std_result = write(file_fd, input, strlen(input));
+                    std_errno = errno;
+
+                    printf("   write to file: %zd byte(s), errno: %d (%s)\n", std_result, std_errno, strerror(std_errno));
+
+                    errno = 0;
+                    ft_result = ft_write(file_fd, input, strlen(input));
+                    ft_errno = errno;
+
+                    printf("   ft_write to file: %zd byte(s), errno: %d (%s)\n", ft_result, ft_errno, strerror(ft_errno));
+                    
+                    printf("\nFile's name: test\nText written to the file: %s\nThe file is available in the root directory of the project\n", input);
+                    close(file_fd);
+                    printf("\nClosed 'test'.\n");
+                }
+
             } else {
                 printf("Input error. Please try again.\n");
                 while (getchar() != '\n');
@@ -200,6 +225,93 @@ void write_test() {
         printf("\n  - \"EXIT\" to quit the program.\n");
         printf("  - \"MENU\" to return to the program menu.\n");
     }
+}
+
+void read_test() {
+    char buffer[256];
+    char buf[256];
+    ssize_t result;
+    ssize_t std_result;
+    size_t bytes_to_read;
+
+    memset(buffer, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
+
+    printf("\nYou are testing the ft_read function.\n");
+
+    printf("Enter the number of bytes to read: ");
+    if (scanf("%zu", &bytes_to_read) != 1) {
+        printf("Invalid input. Please enter a valid number.\n");
+        return;
+    }
+
+    printf("\nTesting with stdin (fd = 0). Enter simular text first for read second for ft_read:\n");
+    std_result = read(0, buffer, bytes_to_read);
+    result = ft_read(0, buf, bytes_to_read);
+    int errno_stdin = errno;
+
+    if (std_result >= 0) {
+        buffer[std_result] = '\0';
+        printf("read result: %s\n", buffer);
+    } else {
+        printf("read error with stdin: errno = %d (%s)\n", errno_stdin, strerror(errno_stdin));
+    }
+
+    if (result >= 0) {
+        buffer[result] = '\0';  
+        printf("ft_read result: %s\n", buf);
+    } else {
+        printf("ft_read error with stdin: errno = %d (%s)\n", errno_stdin, strerror(errno_stdin));
+    }
+
+    printf("\nTesting with invalid fd (-1):\n");
+    std_result = read(-1, buffer, bytes_to_read); 
+    result = ft_read(-1, buffer, bytes_to_read);
+    int errno_invalid_fd = errno;
+
+    if (std_result >= 0) {
+        buffer[std_result] = '\0';
+        printf("read with invalid fd: \"%s\"\n", buffer);
+    } else {
+        printf("read error with invalid fd: errno = %d (%s)\n", errno_invalid_fd, strerror(errno_invalid_fd));
+    }
+
+    if (result >= 0) {
+        buffer[result] = '\0';
+        printf("ft_read with invalid fd: \"%s\"\n", buffer);
+    } else {
+        printf("ft_read error with invalid fd: errno = %d (%s)\n", errno_invalid_fd, strerror(errno_invalid_fd));
+    }
+
+    int file_fd = open("test", O_RDONLY);
+    if (file_fd < 0) {
+        perror("Failed to open file for testing. Create a file with name \"test\" in the root of the project.");
+        return;
+    }
+
+    printf("\nTesting with file (fd = %d):\n", file_fd);
+    printf("Reading from the file 'test'...\n");
+
+    std_result = read(file_fd, buffer, bytes_to_read);
+    result = ft_read(file_fd, buffer, bytes_to_read); 
+    int errno_file = errno;
+
+    if (std_result >= 0) {
+        buffer[std_result] = '\0';
+        printf("Standard read result from file 'test': \"%s\"\n", buffer);
+    } else {
+        printf("Standard read error with file 'test': errno = %d (%s)\n", errno_file, strerror(errno_file));
+    }
+
+    if (result >= 0) {
+        buffer[result] = '\0';
+        printf("ft_read result from file 'test': \"%s\"\n", buffer);
+    } else {
+        printf("ft_read error with file 'test': errno = %d (%s)\n", errno_file, strerror(errno_file));
+    }
+
+    close(file_fd);
+    printf("Closed the test file 'test'.\n");
 }
 
 int main() {
@@ -241,6 +353,9 @@ int main() {
             }
             if (number == 4) {
                 write_test();
+            }
+            if (number == 5) {
+                read_test();
             } else {
                 printf("Function %d is not yet implemented.\n", number);
             }
@@ -251,3 +366,4 @@ int main() {
 
     return 0;
 }
+
