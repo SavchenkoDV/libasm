@@ -23,7 +23,7 @@ $(NAME): $(ASM_OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 test: $(NAME) $(C_OBJ)
-	$(CC) $(CFLAGS) -o libasm $(C_OBJ) $(NAME)
+	$(CC) $(CFLAGS) -o libasm $(C_OBJ) -L. -lasm
 
 clean:
 	rm -f $(ASM_OBJ) $(C_OBJ)
