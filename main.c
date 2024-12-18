@@ -5,15 +5,18 @@
 #include <errno.h>
 #include <fcntl.h>
 
-size_t  ft_strlen(const char *s);
-char    *ft_strcpy(char *restrict dst, const char *restrict src);
-int     ft_strcmp(const char *s1, const char *s2);
-ssize_t ft_write(int fd, const void *buf, size_t count);
-ssize_t ft_read(int fd, void *buf, size_t count);
-char    *ft_strdup(const char*s);
+#define BUFFER_SIZE 1024
+
+size_t		ft_strlen(const char *s);
+char		*ft_strcpy(char *dest, const char *src);
+int			ft_strcmp(const char *s1, const char *s2);
+ssize_t		ft_write(int fd, const void *buf, size_t count);
+ssize_t		ft_read(int fd, void *buf, size_t count);
+char		*ft_strdup(const char *s);
+
 
 void strlen_test() {
-    char    input[256];
+    char    input[BUFFER_SIZE];
     int     counter = 0;
 
     printf("\nYou are testing the ft_strlen function.\n");
@@ -47,7 +50,7 @@ void strlen_test() {
 }
 
 void strcpy_test() {
-    char input[256];
+    char input[BUFFER_SIZE];
     int counter = 0;
 
     printf("\nYou are testing the ft_strcpy function.\n");
@@ -68,8 +71,8 @@ void strcpy_test() {
                 break;
             }
 
-            char std_dest[256] = {0};
-            char ft_dest[256] = {0};
+            char std_dest[BUFFER_SIZE] = {0};
+            char ft_dest[BUFFER_SIZE] = {0};
 
             printf("\nTest number: %i\n", ++counter);
             printf("   strcpy result: \"%s\"\n", strcpy(std_dest, input));
@@ -85,8 +88,8 @@ void strcpy_test() {
 
 
 void strcmp_test() {
-    char input_f[256];
-    char input_s[256];
+    char input_f[BUFFER_SIZE];
+    char input_s[BUFFER_SIZE];
     int counter = 0;
 
     printf("\nYou are testing the ft_strcmp function.\n");
@@ -132,8 +135,8 @@ void strcmp_test() {
 }
 
 void write_test() {
-    char input[256];
-    char fd_input[256];
+    char input[BUFFER_SIZE];
+    char fd_input[BUFFER_SIZE];
     int fd;
     int counter = 0;
 
@@ -229,94 +232,79 @@ void write_test() {
 }
 
 void read_test() {
-    char buffer[256];
-    char buf[256];
-    ssize_t result;
-    ssize_t std_result;
-    size_t bytes_to_read;
+    printf("Test 1: Checking stdin started. Input data: \n");
+    char buffer_stdin[BUFFER_SIZE];
 
-    memset(buffer, 0, sizeof(buf));
-    memset(buf, 0, sizeof(buf));
+    ssize_t bytes_read_stdin = ft_read(STDIN_FILENO, buffer_stdin, BUFFER_SIZE - 1);
 
-    printf("\nYou are testing the ft_read function.\n");
+    printf("ft_read error: %d (%s)\n", errno, strerror(errno));
+    buffer_stdin[bytes_read_stdin] = '\0';
+    printf("Read %zd bytes.\n", bytes_read_stdin);
 
-    printf("Enter the number of bytes to read: ");
-    if (scanf("%zu", &bytes_to_read) != 1) {
-        printf("Invalid input. Please enter a valid number.\n");
-        return;
+    printf("\nTest 2: Reading from the 'test' file started.\n");
+
+    char filename[] = "test";
+    int bytes_to_read;
+    
+    printf("Please create the file 'test' and specify the number of bytes to read: ");
+    scanf("%d", &bytes_to_read);
+
+    int fd_std = open(filename, O_RDONLY);
+    if (fd_std == -1) {
+        printf("Error opening the file for read: %d (%s)\n", errno, strerror(errno));
+        exit(0);
     }
 
-    printf("\nTesting with stdin (fd = 0). Enter simular text first for read second for ft_read:\n");
-    std_result = read(0, buffer, bytes_to_read);
-    result = ft_read(0, buf, bytes_to_read);
-    int errno_stdin = errno;
+    char buffer_read[BUFFER_SIZE];
+    ssize_t bytes_read_std_file = read(fd_std, buffer_read, bytes_to_read);
+    printf("read error: %d (%s)\n", errno, strerror(errno));
+    close(fd_std);
 
-    if (std_result >= 0) {
-        buffer[std_result] = '\0';
-        printf("read result: %s\n", buffer);
+    if (bytes_read_std_file == -1) {
+        printf("Error reading using read.\n");
     } else {
-        printf("read error with stdin: errno = %d (%s)\n", errno_stdin, strerror(errno_stdin));
+        printf("read: Read %zd bytes. Data: %.*s\n", bytes_read_std_file, (int)bytes_read_std_file, buffer_read);
     }
 
-    if (result >= 0) {
-        buffer[result] = '\0';  
-        printf("ft_read result: %s\n", buf);
+    int fd_ft = open(filename, O_RDONLY);
+    if (fd_ft == -1) {
+        printf("Error opening the file for read: %d (%s)\n", errno, strerror(errno));
+        exit(0);
+    }
+
+    char buffer_ft_read[BUFFER_SIZE];
+    ssize_t bytes_read_ft_file = ft_read(fd_ft, buffer_ft_read, bytes_to_read);
+    printf("ft_read: %d (%s)\n", errno, strerror(errno));
+    close(fd_ft);
+
+    if (bytes_read_ft_file == -1) {
+        printf("Error opening the file for ft_read: %d (%s)\n", errno, strerror(errno));
     } else {
-        printf("ft_read error with stdin: errno = %d (%s)\n", errno_stdin, strerror(errno_stdin));
+        printf("ft_read: Read %zd bytes. Data: %.*s\n", bytes_read_ft_file, (int)bytes_read_ft_file, buffer_ft_read);
     }
 
-    printf("\nTesting with invalid fd (-1):\n");
-    std_result = read(-1, buffer, bytes_to_read); 
-    result = ft_read(-1, buffer, bytes_to_read);
-    int errno_invalid_fd = errno;
+        printf("\nTest 3: Checking invalid file descriptor started.\n");
 
-    if (std_result >= 0) {
-        buffer[std_result] = '\0';
-        printf("read with invalid fd: \"%s\"\n", buffer);
+    int invalid_fd = -1;
+    
+    char buffer_invalid[BUFFER_SIZE];
+
+    ssize_t bytes_read_ft_invalid = ft_read(invalid_fd, buffer_invalid, BUFFER_SIZE - 1);
+    printf("ft_read error: %d (%s)\n", errno, strerror(errno));
+    ssize_t bytes_read_std_invalid = read(invalid_fd, buffer_invalid, BUFFER_SIZE - 1);
+    printf("read error: %d (%s)\n", errno, strerror(errno));
+
+    if (bytes_read_ft_invalid == bytes_read_std_invalid) {
+        printf("ft_read and read results match.\n");
     } else {
-        printf("read error with invalid fd: errno = %d (%s)\n", errno_invalid_fd, strerror(errno_invalid_fd));
+        printf("ft_read and read results do not match.\n");
     }
 
-    if (result >= 0) {
-        buffer[result] = '\0';
-        printf("ft_read with invalid fd: \"%s\"\n", buffer);
-    } else {
-        printf("ft_read error with invalid fd: errno = %d (%s)\n", errno_invalid_fd, strerror(errno_invalid_fd));
-    }
-
-    int file_fd = open("test", O_RDONLY);
-    if (file_fd < 0) {
-        perror("Failed to open file for testing. Create a file with name \"test\" in the root of the project.");
-        return;
-    }
-
-    printf("\nTesting with file (fd = %d):\n", file_fd);
-    printf("Reading from the file 'test'...\n");
-
-    std_result = read(file_fd, buffer, bytes_to_read);
-    result = ft_read(file_fd, buffer, bytes_to_read); 
-    int errno_file = errno;
-
-    if (std_result >= 0) {
-        buffer[std_result] = '\0';
-        printf("Standard read result from file 'test': \"%s\"\n", buffer);
-    } else {
-        printf("Standard read error with file 'test': errno = %d (%s)\n", errno_file, strerror(errno_file));
-    }
-
-    if (result >= 0) {
-        buffer[result] = '\0';
-        printf("ft_read result from file 'test': \"%s\"\n", buffer);
-    } else {
-        printf("ft_read error with file 'test': errno = %d (%s)\n", errno_file, strerror(errno_file));
-    }
-
-    close(file_fd);
-    printf("Closed the test file 'test'.\n");
+    exit(0);
 }
 
 void strdup_test() {
-    char input[256];
+    char input[BUFFER_SIZE];
     int counter = 0;
 
     printf("\nYou are testing the ft_strdup function.\n");
@@ -339,7 +327,6 @@ void strdup_test() {
 
             printf("\nTest number: %d\n", ++counter);
 
-            // Standard strdup
             char *std_result = strdup(input);
             if (std_result == NULL) {
                 perror("   strdup failed");
@@ -347,7 +334,6 @@ void strdup_test() {
                 printf("   strdup result: \"%s\"\n", std_result);
             }
 
-            // Custom ft_strdup
             char *ft_result = ft_strdup(input);
             if (ft_result == NULL) {
                 perror("ft_strdup failed");
@@ -355,14 +341,12 @@ void strdup_test() {
                 printf("ft_strdup result: \"%s\"\n", ft_result);
             }
 
-            // Compare results
             if (std_result && ft_result && strcmp(std_result, ft_result) == 0) {
                 printf("The results match!\n");
             } else {
                 printf("The results do not match.\n");
             }
 
-            // Free memory
             free(std_result);
             free(ft_result);
         } else {
