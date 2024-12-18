@@ -10,6 +10,7 @@ char    *ft_strcpy(char *restrict dst, const char *restrict src);
 int     ft_strcmp(const char *s1, const char *s2);
 ssize_t ft_write(int fd, const void *buf, size_t count);
 ssize_t ft_read(int fd, void *buf, size_t count);
+char    *ft_strdup(const char*s);
 
 void strlen_test() {
     char    input[256];
@@ -314,6 +315,66 @@ void read_test() {
     printf("Closed the test file 'test'.\n");
 }
 
+void strdup_test() {
+    char input[256];
+    int counter = 0;
+
+    printf("\nYou are testing the ft_strdup function.\n");
+    printf("Enter any string to test the function, or type:\n");
+    printf("  - \"EXIT\" to quit the program.\n");
+    printf("  - \"MENU\" to return to the program menu.\n");
+
+    while (1) {
+        printf("\nInput string to duplicate: ");
+        if (fgets(input, sizeof(input), stdin)) {
+            input[strcspn(input, "\n")] = '\0';
+
+            if (strcmp(input, "EXIT") == 0) {
+                printf("Exiting the program.\n");
+                exit(0);
+            } else if (strcmp(input, "MENU") == 0) {
+                printf("Returning to the main menu.\n");
+                break;
+            }
+
+            printf("\nTest number: %d\n", ++counter);
+
+            // Standard strdup
+            char *std_result = strdup(input);
+            if (std_result == NULL) {
+                perror("   strdup failed");
+            } else {
+                printf("   strdup result: \"%s\"\n", std_result);
+            }
+
+            // Custom ft_strdup
+            char *ft_result = ft_strdup(input);
+            if (ft_result == NULL) {
+                perror("ft_strdup failed");
+            } else {
+                printf("ft_strdup result: \"%s\"\n", ft_result);
+            }
+
+            // Compare results
+            if (std_result && ft_result && strcmp(std_result, ft_result) == 0) {
+                printf("The results match!\n");
+            } else {
+                printf("The results do not match.\n");
+            }
+
+            // Free memory
+            free(std_result);
+            free(ft_result);
+        } else {
+            printf("Input error. Please try again.\n");
+        }
+
+        printf("\n  - \"EXIT\" to quit the program.\n");
+        printf("  - \"MENU\" to return to the program menu.\n");
+    }
+}
+
+
 int main() {
     int number = -1;
 
@@ -356,6 +417,9 @@ int main() {
             }
             if (number == 5) {
                 read_test();
+            }
+            if (number == 6) {
+                strdup_test();
             } else {
                 printf("Function %d is not yet implemented.\n", number);
             }

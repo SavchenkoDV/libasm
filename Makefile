@@ -1,6 +1,6 @@
 NAME = libasm
 
-ASM_SRC = ft_strlen.s ft_strcpy.s ft_strcmp.s ft_write.s ft_read.s 
+ASM_SRC = ft_strlen.s ft_strcpy.s ft_strcmp.s ft_write.s ft_read.s ft_strdup.s 
 C_SRC = main.c
 ASM_OBJ = $(ASM_SRC:.s=.o)
 C_OBJ = $(C_SRC:.c=.o)
@@ -8,7 +8,7 @@ C_OBJ = $(C_SRC:.c=.o)
 CC = gcc
 ASM = nasm
 ASM_FLAGS = -f elf64
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 
 all: $(NAME)
 
