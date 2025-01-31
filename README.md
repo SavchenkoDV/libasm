@@ -1,6 +1,5 @@
 ﻿# libasm
-The aim of this project is to get familiar with assembly language.
-</br>The following functions have been implemented:
+The following functions have been implemented:
 </br> ◦ ft_strlen (man 3 strlen)
 </br> ◦ ft_strcpy (man 3 strcpy)
 </br> ◦ ft_strcmp (man 3 strcmp)
