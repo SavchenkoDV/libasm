@@ -1,9 +1,5 @@
 ﻿# libasm
-The following functions have been implemented:
-</br> ◦ ft_strlen (man 3 strlen)
-</br> ◦ ft_strcpy (man 3 strcpy)
-</br> ◦ ft_strcmp (man 3 strcmp)
-</br> ◦ ft_write (man 2 write)
-</br> ◦ ft_read (man 2 read)
-</br> ◦ ft_strdup (man 3 strdup, you can call to malloc)
+Libasm
+Reimplemented several standard C library functions using x86-64 Assembly (NASM) to deepen understanding of low-level programming, memory manipulation, and CPU instructions.
+Functions include strlen, strcpy, strcmp, write, read, and strdup, tested via custom test suite and comparison with libc behavior.
 
